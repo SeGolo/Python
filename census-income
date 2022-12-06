@@ -1,0 +1,439 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+# import findspark
+findspark.init()
+findspark.find()
+
+# In[2]:
+
+PATH = "C:/data/census-income-4.csv"
+
+# In[3]:
+
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+import matplotlib.pyplot as plt
+import pandas
+
+# In[4]:
+
+from pyspark.sql import SparkSession
+spark:SparkSession = SparkSession.builder.appName("Q1").getOrCreate()
+
+# In[5]:
+
+## To make some of the headers of an attributes more friendly below will be used next coding:
+## 1_age_AAGE
+## 2_class of worker_ACLSWKR
+## 5_education_AHGA
+## 8_marital stat_AMARITL
+## 10_major occupation code_AMJOCC
+## 11_race_ARACE
+## 13_sex_ASEX
+## 17_capital gains_CAPGAIN
+## 18_capital losses_CAPLOSS
+## 6_wage per hour_AHRSPAY
+## 36_citizenship_PEFNTVTY
+
+# In[6]:
+
+schema = StructType([StructField('AAGE', StringType(), True),
+                     StructField('ACLSWKR', StringType(), True),
+                     StructField('detailed industry recode', StringType(), True),
+                     StructField('detailed occupation recode', StringType(), True),
+                     StructField('AHGA', StringType(), True),
+                     StructField('AHRSPAY', StringType(), True),
+                     StructField('enroll in edu inst last wk', StringType(), True),
+                     StructField('AMARITL', StringType(), True),
+                     StructField('major industry code', StringType(), True),
+                     StructField('AMJOCC', StringType(), True),
+                     StructField('ARACE', StringType(), True),
+                     StructField('hispanic origin', StringType(), True),
+                     StructField('ASEX', StringType(), True),
+                     StructField('member of a labor union', StringType(), True),
+                     StructField('reason for unemployment', StringType(), True),
+                     StructField('full or part time employment stat', StringType(), True),
+                     StructField('CAPGAIN', StringType(), True),
+                     StructField('CAPLOSS', StringType(), True),
+                     StructField('dividends from stocks', StringType(), True),
+                     StructField('tax filer stat', StringType(), True),
+                     StructField('region of previous residence', StringType(), True),
+                     StructField('state of previous residence', StringType(), True),
+                     StructField('detailed household and family stat', StringType(), True),
+                     StructField('| instance weight', StringType(), True),
+                     StructField('instance weight', StringType(), True),
+                     StructField('migration code-change in msa', StringType(), True),
+                     StructField('migration code-change in reg', StringType(), True),
+                     StructField('migration code-move within reg', StringType(), True),
+                     StructField('live in this house 1 year ago', StringType(), True),
+                     StructField('migration prev res in sunbelt', StringType(), True),
+                     StructField('num persons worked for employer', StringType(), True),
+                     StructField('family members under 18', StringType(), True),
+                     StructField('country of birth father', StringType(), True),
+                     StructField('country of birth mother', StringType(), True),
+                     StructField('country of birth self', StringType(), True),
+                     StructField('PEFNTVTY', StringType(), True),
+                     StructField('own business or self employed', StringType(), True),
+                     StructField('fill inc questionnaire for veterans admin', StringType(), True),
+                     StructField('veterans benefits', StringType(), True),
+                     StructField('weeks worked in year', StringType(), True),
+                     StructField('year', StringType(), True)])
+
+
+# In[7]:
+
+
+## I have changed "," on ";" in excel and save file in a .csv formate.
+
+
+# In[8]:
+
+
+df = spark.read.format("csv")    .option("delimiter", ";")    .option("header", "false")    .option("inferSchema", True)    .schema(schema)    .load(PATH)
+df.show(5)
+
+
+# In[9]:
+
+
+## Q1 - 3. Print the data Schema, Summary, # of columns and # of rows.
+
+
+# In[10]:
+
+
+df.printSchema()
+
+
+# In[11]:
+
+
+row=df.count()
+print(f'Number of Rows are: {row}')
+
+
+# In[12]:
+
+
+col=len(df.columns)
+print(f'Number of Columns are: {col}')
+
+
+# In[13]:
+
+
+df.summary().show(5)
+
+
+# In[14]:
+
+
+## To make some of the headers of an attributes more use friendly below will be used next coding:
+## 1_age_AAGE
+## 2_class of worker_ACLSWKR
+## 5_education_AHGA
+## 8_marital stat_AMARITL
+## 10_major occupation code_AMJOCC
+## 11_race_ARACE
+## 13_sex_ASEX
+## 17_capital gains_CAPGAIN
+## 18_capital losses_CAPLOSS
+## 6_wage per hour_AHRSPAY
+## 36_citizenship_PEFNTVTY
+
+
+# In[15]:
+
+
+## To make summary more readable I have choosen to select most significant columns.
+
+
+# In[16]:
+
+
+## df1:
+## 1_age_AAGE
+## 2_class of worker_ACLSWKR
+## 5_education_AHGA
+## 8_marital stat_AMARITL
+
+
+# In[17]:
+
+
+df1=df.select("AAGE", "ACLSWKR", "AHGA", "AMARITL").show(5)
+
+
+# In[18]:
+
+
+## df2:
+## 10_major occupation code_AMJOCC
+## 11_race_ARACE
+## 13_sex_ASEX
+
+
+# In[19]:
+
+
+df2=df.select("AMJOCC", "ARACE", "ASEX").show(5)
+
+
+# In[20]:
+
+
+## df3:
+## 17_capital gains_CAPGAIN
+## 18_capital losses_CAPLOSS
+## 6_wage per hour_AHRSPAY
+## 36_citizenship_PEFNTVTY
+
+
+# In[21]:
+
+
+df3=df.select("CAPGAIN", "CAPLOSS", "AHRSPAY", "PEFNTVTY").show(5)
+
+
+# In[22]:
+
+
+## The data Schema of choosen columns.
+
+
+# In[23]:
+
+
+## df1:
+## 1_age_AAGE
+## 2_class of worker_ACLSWKR
+## 5_education_AHGA
+## 8_marital stat_AMARITL
+
+
+# In[24]:
+
+
+df1=df.select("AAGE", "ACLSWKR", "AHGA", "AMARITL").printSchema()
+
+
+# In[25]:
+
+
+## df2:
+## 10_major occupation code_AMJOCC
+## 11_race_ARACE
+## 13_sex_ASEX
+
+
+# In[26]:
+
+
+df2=df.select("AMJOCC", "ARACE", "ASEX").printSchema()
+
+
+# In[27]:
+
+
+## df3:
+## 17_capital gains_CAPGAIN
+## 18_capital losses_CAPLOSS
+## 6_wage per hour_AHRSPAY
+## 36_citizenship_PEFNTVTY
+
+
+# In[28]:
+
+
+df3=df.select("CAPGAIN", "CAPLOSS", "AHRSPAY", "PEFNTVTY").printSchema()
+
+
+# In[29]:
+
+
+## The summary of choosen columns.
+
+
+# In[30]:
+
+
+## df1:
+## 1_age_AAGE
+## 2_class of worker_ACLSWKR
+## 5_education_AHGA
+## 8_marital stat_AMARITL
+
+
+# In[31]:
+
+
+df1=df.select("AAGE", "ACLSWKR", "AHGA", "AMARITL").summary().show(10)
+
+
+# In[32]:
+
+
+## df2:
+## 10_major occupation code_AMJOCC
+## 11_race_ARACE
+## 13_sex_ASEX
+
+
+# In[33]:
+
+
+df2=df.select("AMJOCC", "ARACE", "ASEX").summary().show(10)
+
+
+# In[34]:
+
+
+## df3:
+## 17_capital gains_17-CAPGAIN
+## 18_capital losses_18-CAPLOSS
+## 6_wage per hour_6-AHRSPAY
+## 36_citizenship_36-PEFNTVTY
+
+
+# In[35]:
+
+
+df3=df.select("CAPGAIN", "CAPLOSS", "AHRSPAY", "PEFNTVTY").summary().show(10)
+
+
+# In[36]:
+
+
+## Q1 - 4. Print a table that distinct values of all columns.
+
+
+# In[37]:
+
+
+df.distinct().show(5)
+
+
+# In[38]:
+
+
+## Q1 - 4-1. Printing a table that distinct values of all columns one by one columns for better illustration. (optional)
+
+
+# In[39]:
+
+
+df.columns
+
+
+# In[40]:
+
+
+## The table in distinct values - Part 1.
+## 1_age_AAGE
+## 2_class of worker_ACLSWKR
+## 5_education_AHGA
+## 8_marital stat_AMARITL
+
+
+# In[41]:
+
+
+df.select('AAGE').distinct().sort(asc('AAGE')).show(100)
+df.select('ACLSWKR').distinct().sort(asc('ACLSWKR')).show(100)
+df.select('AHGA').distinct().sort(asc('AHGA')).show()
+df.select('AMARITL').distinct().sort(asc('AMARITL')).show()
+df.select('AMJOCC').distinct().sort(asc('AMJOCC')).show()
+df.select('ARACE').distinct().sort(asc('ARACE')).show()
+df.select('ASEX').distinct().sort(asc('ASEX')).show()
+df.select('CAPGAIN').distinct().sort(asc('CAPGAIN')).show()
+df.select('CAPLOSS').distinct().sort(asc('CAPLOSS')).show()
+df.select('AHRSPAY').distinct().sort(asc('AHRSPAY')).show()
+df.select('PEFNTVTY').distinct().sort(asc('PEFNTVTY')).show()
+
+
+# In[42]:
+
+
+## Q1 - 5. Make exploratory data analysis and visualize your findings from data.
+
+
+# In[43]:
+
+
+## Calculations of the most significant columns in the table. 
+
+
+# In[44]:
+
+
+## The numbers of people of each age.
+df.select('AAGE').groupBy('AAGE').count().sort(asc('AAGE')).show(100)
+df.select('ACLSWKR').groupBy('ACLSWKR').count().sort(asc('ACLSWKR')).show(100)
+df.select('AHGA').groupBy('AHGA').count().sort(asc('AHGA')).show(100)
+df.select('AMARITL').groupBy('AMARITL').count().sort(asc('AMARITL')).show(100)
+df.select('AMJOCC').groupBy('AMJOCC').count().sort(asc('AMJOCC')).show(100)
+df.select('ARACE').groupBy('ARACE').count().sort(asc('ARACE')).show(100)
+df.select('ASEX').groupBy('ASEX').count().sort(asc('ASEX')).show(100)
+df.select('CAPGAIN').groupBy('CAPGAIN').count().sort(asc('CAPGAIN')).show(100)
+df.select('CAPLOSS').groupBy('CAPLOSS').count().sort(asc('CAPLOSS')).show(100)
+df.select('AHRSPAY').groupBy('AHRSPAY').count().sort(asc('AHRSPAY')).show(100)
+df.select('PEFNTVTY').groupBy('PEFNTVTY').count().sort(asc('PEFNTVTY')).show(100)
+
+
+# In[45]:
+
+
+## For future enhansmante of visualisation I would used scaling of axes or grouping data by categories (0-5, 6-18, 19-35 ...). 
+## unfortunatly I did not ahve a enoughe time to learn how to do it by pyspark
+
+
+# In[46]:
+
+
+dfPlot=df.groupBy("AAGE").count()
+
+x=dfPlot.toPandas()["AAGE"].values.tolist()
+y=dfPlot.toPandas()["count"].values.tolist()
+
+plt.bar(x,y)
+plt.show()
+
+
+# In[47]:
+
+
+dfPlot=df.groupBy("ACLSWKR").count()
+
+x=dfPlot.toPandas()["ACLSWKR"].values.tolist()
+y=dfPlot.toPandas()["count"].values.tolist()
+
+plt.bar(x,y)
+plt.show()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
